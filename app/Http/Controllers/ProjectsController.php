@@ -23,15 +23,19 @@ class ProjectsController extends Controller
 
         auth()->user()->projects()->create($attributes);
 
-//        $attributes['owner_id'] = auth()->id();
-//
-//        // persist
-//        Project::create($attributes);
         return redirect('/projects');
     }
 
     public function show(Project $project)
     {
+        if(auth()->user()->isNot($project->owner)){
+            abort(403);
+        }
         return view('projects.show', compact('project'));
+    }
+
+    public function create()
+    {
+        return view('projects.create');
     }
 }

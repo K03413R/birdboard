@@ -1,10 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>Birdboard</title>
-</head>
-<body>
+@extends('layouts.app')
+
+@section('content')
+    <a href="/projects">All Projects</a>
     <h1>{{$project->title}}</h1>
     <div>{{$project->description}}</div>
-</body>
-</html>
+@endsection
