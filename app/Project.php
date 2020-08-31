@@ -8,11 +8,7 @@ class Project extends Model
 {
     protected $guarded = [];
 
-    public function path()
-    {
-        return "/projects/{$this->id}";
-    }
-
+    // Relationships
     public function owner()
     {
         return $this->belongsTo(User::class);
@@ -23,8 +19,23 @@ class Project extends Model
         return $this->hasMany(Task::class);
     }
 
+    public function activity()
+    {
+        return $this->hasMany(Activity::class)->latest();
+    }
+
     public function addTask(string $body)
     {
         return $this->tasks()->create(compact('body'));
+    }
+
+    public function path()
+    {
+        return "/projects/{$this->id}";
+    }
+
+    public function recordActivity(string $description)
+    {
+        $this->activity()->create(compact('description'));
     }
 }

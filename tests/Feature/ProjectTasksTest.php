@@ -2,12 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Project;
-use App\Task;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Tests\Factories\ProjectFactory;
+use Tests\Factories\TaskFactory;
 use Tests\TestCase;
-use Tests\WorldArrangements\ProjectFactory;
 
 class ProjectTasksTest extends TestCase
 {
@@ -16,7 +15,7 @@ class ProjectTasksTest extends TestCase
     /** @test */
     public function guest_cannot_add_tasks_to_project()
     {
-        $project = factory(Project::class)->create();
+        $project = ProjectFactory::new()->create();
         $this->post($project->path() . '/tasks')->assertRedirect('/login');
     }
 
@@ -25,9 +24,9 @@ class ProjectTasksTest extends TestCase
     {
         $this->signIn();
 
-        $project = factory(Project::class)->create();
+        $project = ProjectFactory::new()->create();
 
-        $attributes = factory(Task::class)->raw();
+        $attributes = TaskFactory::new()->raw();
 
         $this->post($project->path() . '/tasks', $attributes)->assertForbidden();
 
@@ -38,7 +37,7 @@ class ProjectTasksTest extends TestCase
     public function only_the_owner_of_project_can_update_a_task()
     {
         $this->signIn();
-        $project = app(ProjectFactory::class)
+        $project = ProjectFactory::new()
             ->withTasks(1)
             ->create();
 
@@ -51,7 +50,7 @@ class ProjectTasksTest extends TestCase
     /** @test */
     public function a_project_can_have_tasks()
     {
-        $project = factory(Project::class)->create();
+        $project = ProjectFactory::new()->create();
 
         $this->actingAs($project->owner)
             ->post($project->path() . '/tasks', ['body' => 'Lorem Ipsum']);
@@ -64,9 +63,9 @@ class ProjectTasksTest extends TestCase
     /** @test */
     public function a_project_requires_a_body()
     {
-        $project = factory(Project::class)->create();
+        $project = ProjectFactory::new()->create();
 
-        $attributes = factory(Task::class)->raw(['body' => '']);
+        $attributes = TaskFactory::new()->raw(['body' => '']);
 
         $this->actingAs($project->owner)
             ->post($project->path() . '/tasks', $attributes)
@@ -76,21 +75,61 @@ class ProjectTasksTest extends TestCase
     /** @test  */
     public function a_task_can_be_updated()
     {
-        $project = app(ProjectFactory::class)
+        $project = ProjectFactory::new()
             ->withTasks(1)
             ->create();
         $task = $project->tasks->first();
 
         $this->actingAs($project->owner)
             ->patch($task->path(), [
-            'completed' => true,
             'body' => 'changed'
         ]);
 
         $this->assertDatabaseHas('tasks', [
            'id' => $task->id,
-           'completed' => 1
         ]);
+    }
 
+    /** @test */
+    function a_task_can_be_completed()
+    {
+        $project = ProjectFactory::new()
+            ->withTasks(1)
+            ->create();
+        $task = $project->tasks->first();
+
+        $this->actingAs($project->owner)
+            ->patch($task->path(), [
+                'completed' => true
+            ]);
+
+        $this->assertDatabaseHas('tasks', [
+            'id' => $task->id,
+            'completed' => true,
+        ]);
+    }
+
+    /** @test */
+    function a_task_can_be_incompleted()
+    {
+        $project = ProjectFactory::new()
+            ->withTasks(1)
+            ->create();
+        $task = $project->tasks->first();
+
+        $this->actingAs($project->owner)
+            ->patch($task->path(), [
+                'completed' => true
+            ]);
+
+        $this->actingAs($project->owner)
+            ->patch($task->path(), [
+                'completed' => false
+            ]);
+
+        $this->assertDatabaseHas('tasks', [
+            'id' => $task->id,
+            'completed' => false,
+        ]);
     }
 }

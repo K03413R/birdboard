@@ -6,6 +6,7 @@ use App\Project;
 use App\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Tests\Factories\ProjectFactory;
 use Tests\TestCase;
 
 class ProjectTest extends TestCase
@@ -14,7 +15,7 @@ class ProjectTest extends TestCase
     /** @test */
     public function it_has_a_path()
     {
-        $project = factory(Project::class)->create();
+        $project = ProjectFactory::new()->create();
 
         $this->assertEquals('/projects/'.$project->id, $project->path());
     }
@@ -22,14 +23,14 @@ class ProjectTest extends TestCase
     /** @test */
     public function it_has_an_owner()
     {
-        $project = factory(Project::class)->create();
+        $project = ProjectFactory::new()->create();
         $this->assertInstanceOf(User::class, $project->owner);
     }
 
     /** @test */
     public function it_can_add_a_test()
     {
-        $project = factory(Project::class)->create();
+        $project = ProjectFactory::new()->create();
 
         $task = $project->addTask($this->faker->sentence());
 
