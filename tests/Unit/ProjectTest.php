@@ -7,13 +7,15 @@ use App\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\Factories\ProjectFactory;
+use Tests\Factories\UserFactory;
 use Tests\TestCase;
 
 class ProjectTest extends TestCase
 {
     use RefreshDatabase, WithFaker;
+
     /** @test */
-    public function it_has_a_path()
+    function it_has_a_path()
     {
         $project = ProjectFactory::new()->create();
 
@@ -21,14 +23,14 @@ class ProjectTest extends TestCase
     }
 
     /** @test */
-    public function it_has_an_owner()
+    function it_has_an_owner()
     {
         $project = ProjectFactory::new()->create();
         $this->assertInstanceOf(User::class, $project->owner);
     }
 
     /** @test */
-    public function it_can_add_a_test()
+    function it_can_add_a_test()
     {
         $project = ProjectFactory::new()->create();
 
@@ -38,5 +40,13 @@ class ProjectTest extends TestCase
         $this->assertTrue($project->tasks->contains($task));
     }
 
+    /** @test */
+    function it_can_invite_a_user()
+    {
+        $project = ProjectFactory::new()->create();
 
+        $project->invite($user = UserFactory::new()->create());
+
+        $this->assertTrue($project->members->contains($user));
+    }
 }

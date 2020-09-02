@@ -3,10 +3,14 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Str;
 
 class Project extends Model
 {
+    use RecordsActivity;
     protected $guarded = [];
+
 
     // Relationships
     public function owner()
@@ -34,8 +38,13 @@ class Project extends Model
         return "/projects/{$this->id}";
     }
 
-    public function recordActivity(string $description)
+    public function invite(User $user)
     {
-        $this->activity()->create(compact('description'));
+        return $this->members()->attach($user);
+    }
+
+    public function members()
+    {
+        return $this->belongsToMany(User::class, 'project_members')->withTimestamps();
     }
 }

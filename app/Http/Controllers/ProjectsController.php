@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\UpdateProjectRequest;
 use App\Project;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -21,7 +22,7 @@ class ProjectsController extends Controller
      */
     public function index()
     {
-        $projects = auth()->user()->projects;
+        $projects = auth()->user()->allprojects();
         return view('projects.index', compact('projects'));
     }
 
@@ -85,6 +86,14 @@ class ProjectsController extends Controller
     {
         return view('projects.edit', compact('project'));
 
+    }
+
+    public function destroy(Project $project)
+    {
+        $this->authorize('update', $project);
+        $project->delete();
+
+        return redirect(RouteServiceProvider::HOME);
     }
 
     /**

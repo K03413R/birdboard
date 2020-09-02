@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateActivitiesTable extends Migration
+class CreateProjectMembersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,17 +13,13 @@ class CreateActivitiesTable extends Migration
      */
     public function up()
     {
-        Schema::create('activities', function (Blueprint $table) {
+        Schema::create('project_members', function (Blueprint $table) {
             $table->id();
-            $table->string('description');
             $table->foreignId('project_id');
-            $table->nullableMorphs('subject');
             $table->foreignId('user_id');
-            $table->json('changes')->nullable();
             $table->timestamps();
 
-            $table->foreign('project_id')->on('projects')->references('id')->onDelete('cascade');
-            $table->foreign('user_id')->on('users')->references('id')->onDelete('cascade');
+            $table->index(['project_id', 'user_id']);
         });
     }
 
@@ -34,6 +30,6 @@ class CreateActivitiesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('activities');
+        Schema::dropIfExists('project_members');
     }
 }

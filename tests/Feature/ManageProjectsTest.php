@@ -3,9 +3,11 @@
 namespace Tests\Feature;
 
 use App\Project;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\Factories\ProjectFactory;
+use Tests\Factories\UserFactory;
 use Tests\TestCase;
 
 class ManageProjectsTest extends TestCase
@@ -53,6 +55,31 @@ class ManageProjectsTest extends TestCase
         $this->get($project->path() . '/edit')->assertOk();
 
         $this->assertDatabaseHas('projects', $attributes);
+    }
+
+    /** @test */
+    function a_user_can_delete_a_project()
+    {
+        $project = ProjectFactory::new()->create();
+
+        $this->actingAs($project->owner)
+            ->delete($project->path())
+            ->assertRedirect(RouteServiceProvider::HOME);
+
+        $this->assertDatabaseMissing('projects', $project->only('id'));
+
+    }
+
+    /** @test */
+    function unauthorized_users_cannot_delete_projects()
+    {
+        $project = ProjectFactory::new()->create();
+
+        $this->delete($project->path())->assertRedirect('/login');
+
+        $this->signIn();
+
+        $this->delete($project->path())->assertForbidden();
     }
 
     /** @test */
@@ -120,6 +147,20 @@ class ManageProjectsTest extends TestCase
         $project = ProjectFactory::new()->create();
         $this->patch($project->path(), ['notes' => 'changed'])->assertForbidden();
 
+    }
+
+    /** @test */
+    function a_user_can_see_project_invites_on_dashboard()
+    {
+        $project = ProjectFactory::new()->create();
+
+        $john = UserFactory::new()->create();
+
+        $project->invite($john);
+
+        $this->actingAs($john)
+            ->get(RouteServiceProvider::HOME)
+            ->assertSee($project->title);
     }
 
 

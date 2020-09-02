@@ -44,6 +44,9 @@
                                 @endif
                             @else
                                 <li class="nav-item dropdown">
+                                    <img width="35"
+                                         class="rounded-full mr-3"
+                                         src="https://gravatar.com/avatar/{{md5(auth()->user()->email)}}?s=60">
                                     <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
                                         {{ Auth::user()->name }} <span class="caret"></span>
                                     </a>

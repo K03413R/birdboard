@@ -41,4 +41,14 @@ class User extends Authenticatable
     {
         return $this->hasMany(Project::class, 'owner_id')->latest('updated_at');
     }
+
+    public function sharedProjects()
+    {
+        return $this->belongsToMany(Project::class, 'project_members')->latest('updated_at');
+    }
+
+    public function allProjects()
+    {
+        return $this->projects->merge($this->sharedProjects);
+    }
 }

@@ -6,7 +6,22 @@
             <p class="text-sm text-gray-700 font-normal">
                 <a href="/projects" class="text-sm text-gray-700 font-normal no-underline">My Projects</a> / {{$project->title}}
             </p>
-            <a href="{{$project->path().'/edit'}}" class="button">Edit Project</a>
+
+            <div class="flex items-center">
+                @foreach($project->members as $member)
+                    <img
+                        src="{{gravatar_url($member)}}"
+                        alt="{{$member->name}}"
+                        class="rounded-full w-8 mr-2"
+                    >
+                @endforeach
+                <img
+                    src="{{gravatar_url($project->owner->email)}}"
+                    alt="{{$project->owner->name}}"
+                    class="rounded-full w-8 mr-2"
+                >
+                <a href="{{$project->path().'/edit'}}" class="button ml-4">Edit Project</a>
+            </div>
         </div>
     </header>
 
@@ -49,19 +64,18 @@
                         <button type="submit" class="button">Save</button>
                     </form>
 
-                    @if($errors->any())
-                        <div class="field mt-6">
-                            @foreach($errors->all() as $error)
-                                <li class="text-sm text-red-500">{{$error}}</li>
-                            @endforeach
-                        </div>
-                    @endif
+                    @include('errors')
 
                 </div>
             </div>
             <div class="lg:w-1/4 px-3 lg:py-8">
                 @include ('projects.card')
                 @include ('projects.activity.card')
+
+                @can ('manage', $project)
+                    @include('projects.invite')
+                @endcan
+
             </div>
         </div>
     </main>
