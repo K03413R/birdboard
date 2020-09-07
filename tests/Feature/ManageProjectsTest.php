@@ -21,19 +21,8 @@ class ManageProjectsTest extends TestCase
 
         $this->get('/projects/create')->assertSuccessful();
 
-        $attributes = [
-            'title' => $this->faker->sentence(4),
-            'description' => $this->faker->sentence(4),
-            'notes' => 'General Notes'
-        ];
-
-        $response = $this->post('/projects', $attributes);
-        $project = Project::where($attributes)->first();
-
-
-        $response->assertRedirect($project->path());
-
-        $this->get($project->path())
+        $this->followingRedirects()
+            ->post('/projects', $attributes = ProjectFactory::new()->raw())
             ->assertSee($attributes['title'])
             ->assertSee($attributes['description'])
             ->assertSee($attributes['notes'])
@@ -77,9 +66,14 @@ class ManageProjectsTest extends TestCase
 
         $this->delete($project->path())->assertRedirect('/login');
 
-        $this->signIn();
+        $user = $this->signIn();
 
         $this->delete($project->path())->assertForbidden();
+
+        $project->invite($user);
+
+        $this->actingAs($user)
+            ->delete($project->path())->assertForbidden();
     }
 
     /** @test */
@@ -161,6 +155,21 @@ class ManageProjectsTest extends TestCase
         $this->actingAs($john)
             ->get(RouteServiceProvider::HOME)
             ->assertSee($project->title);
+    }
+
+    /** @test */
+    function tasks_can_be_created_when_a_project_is_created()
+    {
+        $this->signIn();
+
+        $this->get('/projects/create')->assertSuccessful();
+
+        $attributes = $attributes = ProjectFactory::new()->raw();
+        $attributes['tasks'] = [['body' => 'First Task']];
+
+        $this->post('/projects', $attributes);
+
+        $this->assertDatabaseHas('tasks', ['body' => 'First Task']);
     }
 
 

@@ -16,7 +16,7 @@ class UserTest extends TestCase
     /** @test */
     public function is_has_projects()
     {
-        $user = factory(User::class)->create();
+        $user = UserFactory::new()->create();
 
         $this->assertInstanceOf(Collection::class, $user->projects);
     }

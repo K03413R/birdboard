@@ -19,6 +19,13 @@ Route::group(['middleware' => 'auth'], function(){
     Route::get('/', 'ProjectsController@index');
 
     //contains all seven crud actions
+//    Route::post('/projects', function(){
+//        return request()->validate([
+//            'title' => 'required',
+//            'description' => 'required',
+//            'notes' => 'nullable'
+//        ]);
+//    });
     Route::resource('projects', 'ProjectsController');
 
     Route::post('projects/{project}/tasks', 'ProjectTasksController@store');

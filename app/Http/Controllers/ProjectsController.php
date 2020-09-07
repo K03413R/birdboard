@@ -5,12 +5,14 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UpdateProjectRequest;
 use App\Project;
 use App\Providers\RouteServiceProvider;
+use App\Task;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 
 class ProjectsController extends Controller
@@ -29,12 +31,22 @@ class ProjectsController extends Controller
     /**
      * Persists the new project
      *
-     * @return Application|RedirectResponse|Redirector
+     * @return mixed
      */
     public function store()
     {
         //validate
         $project = auth()->user()->projects()->create($this->validateRequest());
+
+        if(\request()->has('tasks')){
+            foreach (\request('tasks') as $task){
+                $project->addTask($task['body']);
+            }
+        }
+
+        if(\request()->wantsJson()){
+            return ['message' => $project->path()];
+        }
 
         return redirect($project->path());
     }
@@ -90,7 +102,7 @@ class ProjectsController extends Controller
 
     public function destroy(Project $project)
     {
-        $this->authorize('update', $project);
+        $this->authorize('manage', $project);
         $project->delete();
 
         return redirect(RouteServiceProvider::HOME);
@@ -104,8 +116,8 @@ class ProjectsController extends Controller
     protected function validateRequest(): array
     {
         return request()->validate([
-            'title' => 'sometimes|required',
-            'description' => 'sometimes|required',
+            'title' => 'required',
+            'description' => 'required',
             'notes' => 'nullable'
         ]);
     }
