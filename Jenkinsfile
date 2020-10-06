@@ -3,15 +3,14 @@ pipeline {
   stages {
     stage('composer_install') {
       steps {
-        sh '''sh \'composer update\'
-'''
+        sh 'composer update'
       }
     }
 
     stage('test') {
       steps {
         sh '''
-        sh \'vendor/bin/phpunit\''''
+        vendor/bin/phpunit'''
       }
     }
 
